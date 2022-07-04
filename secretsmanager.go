@@ -1,26 +1,3 @@
-// Package ibmcsm provides API to work with IBM Cloud Secrets Manager secrets
-//
-// Implemented
-// - read secret
-//
-// Not implemented
-// - create secret
-// - create group
-// - delete secret
-// - delete group
-// - list groups
-// - list secrets
-// - read group
-//
-// Example usage
-//
-//   // Initialize SecretsManager instance
-//   sm := ibmcsm.NewSecretsManager(endpoint, token)
-//   // Initialize secret of type 'kv' (refer to Secrete Manager docs for secrets types) with ID
-//   secret := ibmcsm.NewKeyValueSecret(ID)
-//   // Read secret from Secrets Manager
-//   err := sm.Read(secret)
-//
 package ibmcsm
 
 import (
