@@ -1,103 +1,117 @@
 package ibmcsm
 
-import "time"
-
-type secretType string
-
-const (
-	UsernamePasswordType secretType = "username_password"
-	KeyValueType         secretType = "kv"
-	ArbitraryType        secretType = "arbitrary"
+import (
+	"time"
 )
 
-type secretresource interface {
-	Id() string
-	Type() secretType
-}
+const (
+	usernamePasswordType = "username_password"
+	keyValueType         = "kv"
+	arbitraryType        = "arbitrary"
+)
 
-// readSecret represents secret in Secrets Manager.
-type secret struct {
+type secretError struct {
 	Metadata struct {
 		CollectionType  string `json:"collection_type"`
 		CollectionTotal int    `json:"collection_total"`
 	} `json:"metadata"`
-	Resources []secretresource `json:"resources"`
+	Resources []struct {
+		ErrorMessage string `json:"error_message"`
+	} `json:"resources"`
+	Errors []struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	} `json:"errors"`
 }
 
-type readSecretResource struct {
-	CreatedBy        string        `json:"created_by"`
-	CreationDate     time.Time     `json:"creation_date"`
-	Crn              string        `json:"crn"`
-	Downloaded       bool          `json:"downloaded"`
-	ID               string        `json:"id"`
-	Labels           []interface{} `json:"labels"`
-	LastUpdateDate   time.Time     `json:"last_update_date"`
-	LocksTotal       int           `json:"locks_total"`
-	Name             string        `json:"name"`
-	SecretData       interface{}   `json:"secret_data"`
-	SecretGroupID    string        `json:"secret_group_id"`
-	SecretType       secretType    `json:"secret_type"`
-	State            int           `json:"state"`
-	StateDescription string        `json:"state_description"`
-	Versions         []struct {
-		CreatedBy        string    `json:"created_by"`
-		CreationDate     time.Time `json:"creation_date"`
-		Downloaded       bool      `json:"downloaded"`
-		ID               string    `json:"id"`
-		PayloadAvailable bool      `json:"payload_available"`
-	} `json:"versions"`
-	VersionsTotal int `json:"versions_total"`
+type keyValueSecret struct {
+	Metadata  metadata                 `json:"metadata"`
+	Resources []keyValueSecretResource `json:"resources"`
 }
 
-func (s *readSecretResource) Id() string {
-	return s.ID
+type keyValueSecretResource struct {
+	CreatedBy      string    `json:"created_by,omitempty"`
+	CreationDate   time.Time `json:"creation_date,omitempty"`
+	Crn            string    `json:"crn,omitempty"`
+	Downloaded     bool      `json:"downloaded,omitempty"`
+	ID             string    `json:"id,omitempty"`
+	Labels         []string  `json:"labels,omitempty"`
+	LastUpdateDate time.Time `json:"last_update_date,omitempty"`
+	LocksTotal     int       `json:"locks_total,omitempty"`
+	Name           string    `json:"name,omitempty"`
+	SecretData     struct {
+		Payload map[string]string `json:"payload,omitempty"`
+	} `json:"secret_data,omitempty"`
+	SecretGroupID    string    `json:"secret_group_id,omitempty"`
+	SecretType       string    `json:"secret_type,omitempty"`
+	State            int       `json:"state,omitempty"`
+	StateDescription string    `json:"state_description,omitempty"`
+	Versions         []version `json:"versions,omitempty"`
+	VersionsTotal    int       `json:"versions_total,omitempty"`
 }
 
-func (s *readSecretResource) Type() secretType {
-	return s.SecretType
+type usernamePasswordSecret struct {
+	Metadata  metadata                         `json:"metadata"`
+	Resources []usernamePasswordSecretResource `json:"resources"`
 }
 
-type secretsDataUsernamePassword struct {
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
+type usernamePasswordSecretResource struct {
+	CreatedBy      string    `json:"created_by,omitempty"`
+	CreationDate   time.Time `json:"creation_date,omitempty"`
+	Crn            string    `json:"crn,omitempty"`
+	Downloaded     bool      `json:"downloaded,omitempty"`
+	ID             string    `json:"id,omitempty"`
+	Labels         []string  `json:"labels,omitempty"`
+	LastUpdateDate time.Time `json:"last_update_date,omitempty"`
+	LocksTotal     int       `json:"locks_total,omitempty"`
+	Name           string    `json:"name,omitempty"`
+	SecretData     struct {
+		Username string `json:"username,omitempty"`
+		Password string `json:"password,omitempty"`
+	} `json:"secret_data,omitempty"`
+	SecretGroupID    string    `json:"secret_group_id,omitempty"`
+	SecretType       string    `json:"secret_type,omitempty"`
+	State            int       `json:"state,omitempty"`
+	StateDescription string    `json:"state_description,omitempty"`
+	Versions         []version `json:"versions,omitempty"`
+	VersionsTotal    int       `json:"versions_total,omitempty"`
 }
 
-type secretsDataKeyValue struct {
-	Payload map[string]string `json:"payload,omitempty"`
+type arbitrarySecret struct {
+	Metadata  metadata                  `json:"metadata"`
+	Resources []arbitrarySecretResource `json:"resources"`
 }
 
-type secretsDataArbitrary struct {
-	Payload string `json:"payload,omitempty"`
+type arbitrarySecretResource struct {
+	CreatedBy      string    `json:"created_by,omitempty"`
+	CreationDate   time.Time `json:"creation_date,omitempty"`
+	Crn            string    `json:"crn,omitempty"`
+	Downloaded     bool      `json:"downloaded,omitempty"`
+	ID             string    `json:"id,omitempty"`
+	Labels         []string  `json:"labels,omitempty"`
+	LastUpdateDate time.Time `json:"last_update_date,omitempty"`
+	LocksTotal     int       `json:"locks_total,omitempty"`
+	Name           string    `json:"name,omitempty"`
+	SecretData     struct {
+		Payload string `json:"payload,omitempty"`
+	} `json:"secret_data,omitempty"`
+	SecretGroupID    string    `json:"secret_group_id,omitempty"`
+	SecretType       string    `json:"secret_type,omitempty"`
+	State            int       `json:"state,omitempty"`
+	StateDescription string    `json:"state_description,omitempty"`
+	Versions         []version `json:"versions,omitempty"`
+	VersionsTotal    int       `json:"versions_total,omitempty"`
 }
 
-type SecretOptions struct {
-	Id             string     `json:"id,omitempty"`
-	SecretType     secretType `json:"secret_type,omitempty"`
-	Name           string     `json:"name,omitempty"`
-	Description    string     `json:"description,omitempty"`
-	Labels         []string   `json:"labels,omitempty"`
-	SecretGroupID  string     `json:"secret_group_id,omitempty"`
-	ExpirationDate time.Time  `json:"expiration_date,omitempty"`
+type metadata struct {
+	CollectionType  string `json:"collection_type,omitempty"`
+	CollectionTotal int    `json:"collection_total,omitempty"`
 }
 
-func NewSecret(opt *SecretOptions) *secret {
-	secret := &secret{}
-	secretResource := &readSecretResource{}
-
-	switch opt.SecretType {
-	case UsernamePasswordType:
-		secretResource.SecretData = secretsDataUsernamePassword{}
-	case KeyValueType:
-		secretResource.SecretData = secretsDataKeyValue{}
-	case ArbitraryType:
-		secretResource.SecretData = secretsDataArbitrary{}
-	}
-
-	if len(opt.Id) > 0 {
-		secretResource.ID = opt.Id
-		secretResource.SecretType = opt.SecretType
-		secret.Resources = append(secret.Resources, secretResource)
-	}
-
-	return secret
+type version struct {
+	CreatedBy        string    `json:"created_by,omitempty"`
+	CreationDate     time.Time `json:"creation_date,omitempty"`
+	Downloaded       bool      `json:"downloaded,omitempty"`
+	ID               string    `json:"id,omitempty"`
+	PayloadAvailable bool      `json:"payload_available,omitempty"`
 }

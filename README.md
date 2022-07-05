@@ -1,28 +1,22 @@
-# Secrets Manager
+# Read secrets from IBM Cloud Secret Manager
 
-sercretsmanager provides API to work with IBM Cloud Secrets Manager secrets
+Package ibmcsm provides API to read secrets from IBM Cloud Secrets Manager.
 
 Implemented
-- read secret
+- read username_password, kv and arbitrary secrets
 
 Not implemented
-- create secret
-- create group
-- delete secret
-- delete group
-- list groups
-- list secrets
-- read group
+- read iam_credentials,imported_cert,public_cert,private_cert secrets
 
 Example usage
 
 ```go
 // Initialize SecretsManager instance
-sm := secretsmanager.NewSecretsManager(endpoint, token)
-// Initialize secret of type 'kv' (refer to Secrete Manager docs for secrets types) with ID
-secret := secretsmanager.NewKeyValueSecret(ID)
-// Read secret from Secrets Manager
-err := sm.Read(secret)
+sm := ibmcsm.NewSecretsManager(endpoint, apikey)
+// Read kv secret with specific id
+secret := ibmcsm.ReadKeyValueSecret(id)
+// Read velue from kv secret for specific key
+secret.Resources[0].SecretData.Payload["key"]
 ```
 
 ---
