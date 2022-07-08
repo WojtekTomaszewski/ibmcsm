@@ -1,4 +1,4 @@
-package ibmcsm
+package main
 
 import (
 	"time"

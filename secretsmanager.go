@@ -1,4 +1,4 @@
-package ibmcsm
+package main
 
 import (
 	"context"
@@ -8,9 +8,14 @@ import (
 	"net/http"
 )
 
+type httpclient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type secretsManager struct {
 	endpoint string
 	apikey   string
+	client   httpclient
 	token    *ibmctoken.Token
 }
 
@@ -18,6 +23,7 @@ type secretsManager struct {
 func NewSecretsManager(endpoint string, apikey string) *secretsManager {
 	return &secretsManager{
 		endpoint: endpoint,
+		client:   &http.Client{},
 		token: &ibmctoken.Token{
 			ApiKey: apikey,
 		},
@@ -41,7 +47,7 @@ func (sm *secretsManager) request(ctx context.Context, url string) (*http.Respon
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", sm.token.AccessToken))
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := sm.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
