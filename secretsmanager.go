@@ -1,10 +1,10 @@
-package main
+package ibmcsm
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/WojtekTomaszewski/ibmctoken/ibmctoken"
+	"github.com/WojtekTomaszewski/ibmctoken"
 	"net/http"
 )
 
@@ -12,32 +12,32 @@ type httpclient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-type secretsManager struct {
+type SecretsManager struct {
 	endpoint string
 	apikey   string
 	client   httpclient
-	token    *ibmctoken.Token
 }
 
 // NewSecretsManager creates new instance of SecretsManager for provided endpoint and access token.
-func NewSecretsManager(endpoint string, apikey string) *secretsManager {
-	return &secretsManager{
+func NewSecretsManager(endpoint string, apikey string) *SecretsManager {
+
+	return &SecretsManager{
 		endpoint: endpoint,
+		apikey:   apikey,
 		client:   &http.Client{},
-		token: &ibmctoken.Token{
-			ApiKey: apikey,
-		},
 	}
 }
 
 // request is helper that makes HTTP request to SecretsManager instance.
-func (sm *secretsManager) request(ctx context.Context, url string) (*http.Response, error) {
+func (sm *SecretsManager) request(ctx context.Context, url string) (*http.Response, error) {
 
-	if sm.token.Expired() {
-		err := sm.token.RequestTokenWithContext(ctx)
-		if err != nil {
-			return nil, err
-		}
+	token := &ibmctoken.Token{
+		ApiKey: sm.apikey,
+		Client: sm.client,
+	}
+
+	if err := token.RequestToken(); err != nil {
+		return nil, err
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -45,9 +45,9 @@ func (sm *secretsManager) request(ctx context.Context, url string) (*http.Respon
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", sm.token.AccessToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
 
-	res, err := sm.client.Do(req)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -65,12 +65,12 @@ func (sm *secretsManager) request(ctx context.Context, url string) (*http.Respon
 }
 
 // ReadKeyValueSecret reads secrets of type Secrets from SecretsManager instance.
-func (sm *secretsManager) ReadKeyValueSecret(id string) (*keyValueSecret, error) {
+func (sm *SecretsManager) ReadKeyValueSecret(id string) (*keyValueSecret, error) {
 	return sm.ReadKeyValueSecretWithContext(context.Background(), id)
 }
 
 // ReadKeyValueSecretWithContext reads secrets of type Secrets from SecretsManager instance.
-func (sm *secretsManager) ReadKeyValueSecretWithContext(ctx context.Context, id string) (*keyValueSecret, error) {
+func (sm *SecretsManager) ReadKeyValueSecretWithContext(ctx context.Context, id string) (*keyValueSecret, error) {
 	urlPath := fmt.Sprintf("/api/v1/secrets/%s/%s", keyValueType, id)
 	url := fmt.Sprintf("%s%s", sm.endpoint, urlPath)
 
@@ -89,12 +89,12 @@ func (sm *secretsManager) ReadKeyValueSecretWithContext(ctx context.Context, id 
 }
 
 // ReadUsernamePasswordSecret reads secrets of type username_password from SecretsManager instance.
-func (sm *secretsManager) ReadUsernamePasswordSecret(id string) (*usernamePasswordSecret, error) {
+func (sm *SecretsManager) ReadUsernamePasswordSecret(id string) (*usernamePasswordSecret, error) {
 	return sm.ReadUsernamePasswordSecretWithContext(context.Background(), id)
 }
 
 // ReadUsernamePasswordSecretWithContext reads secrets of type username_password from SecretsManager instance.
-func (sm *secretsManager) ReadUsernamePasswordSecretWithContext(ctx context.Context, id string) (*usernamePasswordSecret, error) {
+func (sm *SecretsManager) ReadUsernamePasswordSecretWithContext(ctx context.Context, id string) (*usernamePasswordSecret, error) {
 	urlPath := fmt.Sprintf("/api/v1/secrets/%s/%s", usernamePasswordType, id)
 	url := fmt.Sprintf("%s%s", sm.endpoint, urlPath)
 
@@ -113,12 +113,12 @@ func (sm *secretsManager) ReadUsernamePasswordSecretWithContext(ctx context.Cont
 }
 
 // ReadArbitrarySecret reads secrets of type username_password from SecretsManager instance.
-func (sm *secretsManager) ReadArbitrarySecret(id string) (*arbitrarySecret, error) {
+func (sm *SecretsManager) ReadArbitrarySecret(id string) (*arbitrarySecret, error) {
 	return sm.ReadArbitrarySecretWithContext(context.Background(), id)
 }
 
 // ReadArbitrarySecretWithContext reads secrets of type username_password from SecretsManager instance.
-func (sm *secretsManager) ReadArbitrarySecretWithContext(ctx context.Context, id string) (*arbitrarySecret, error) {
+func (sm *SecretsManager) ReadArbitrarySecretWithContext(ctx context.Context, id string) (*arbitrarySecret, error) {
 	urlPath := fmt.Sprintf("/api/v1/secrets/%s/%s", arbitraryType, id)
 	url := fmt.Sprintf("%s%s", sm.endpoint, urlPath)
 

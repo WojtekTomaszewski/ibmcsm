@@ -15,4 +15,4 @@
 //   secret := ibmcsm.ReadKeyValueSecret(id)
 //   // Read velue from kv secret for specific key
 //   secret.Resources[0].SecretData.Payload["key"]
-package main
+package ibmcsm
