@@ -1,6 +1,7 @@
 package ibmcsm
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -40,7 +41,7 @@ type keyValueSecretResource struct {
 	LocksTotal     int       `json:"locks_total,omitempty"`
 	Name           string    `json:"name,omitempty"`
 	SecretData     struct {
-		Payload map[string]string `json:"payload,omitempty"`
+		Payload *json.RawMessage `json:"payload,omitempty"`
 	} `json:"secret_data,omitempty"`
 	SecretGroupID    string    `json:"secret_group_id,omitempty"`
 	SecretType       string    `json:"secret_type,omitempty"`
