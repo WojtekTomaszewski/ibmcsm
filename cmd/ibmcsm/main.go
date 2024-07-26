@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	smEndpoint := "https://b1a31726-787e-4cdb-9534-99f4e2b5c560.eu-de.secrets-manager.appdomain.cloud"
-	smId := "91bea799-80e2-d255-5da7-a8a20349f422"
+	smEndpoint := os.Getenv("SM_URL")
+	smId := os.Getenv("SM_SECRET_ID")
 	apiKey := os.Getenv("SM_API_KEY")
 
 	sm := ibmcsm.NewSecretsManager(smEndpoint, apiKey)
